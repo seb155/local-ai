@@ -8,7 +8,6 @@ Local AI is a self-hosted AI ecosystem designed by **Sebastien Gagnon** to run A
 /root/local-ai/
 ├── local-ai-ollama/      # Ollama-based AI models and Open WebUI
 ├── local-ai-n8n-rag/     # N8N automation and Flowise integration
-└── README.md             # Project documentation
 ```
 
 ### Services and Their Roles
