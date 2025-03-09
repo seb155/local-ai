@@ -1,0 +1,53 @@
+volumes:
+  ollama_storage:
+  open-webui:
+
+networks:
+  local-ai-net:  # Define network here
+    external: true
+
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    networks: ['local-ai-net']
+    restart: unless-stopped
+    container_name: open-webui
+    ports:
+      - "3000:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - /mnt/nvme-ai/Docker/volumes/ollama_open-webui:/app/backend/data
+    environment:
+      - OLLAMA_API_BASE_URL=http://ollama:11434
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - 11434:11434
+    volumes:
+      - /mnt/nvme-ai/ollama_models:/root/.ollama
+    networks:
+      - local-ai-net
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  ollama-pull-llama:
+    image: ollama/ollama:latest
+    container_name: ollama-pull-llama
+    restart: "no"
+    networks:
+      - local-ai-net
+    volumes:
+      - /mnt/nvme-ai/ollama_models:/root/.ollama
+    entrypoint: /bin/sh
+    command:
+      - "-c"
+      - "sleep 3; OLLAMA_HOST=ollama:11434 ollama pull llama3; OLLAMA_HOST=ollama:11434 ollama pull nomic-embed-text"
